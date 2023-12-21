@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "postgresql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model User {
+  id        String          @id @default(uuid())
+  email     String          @unique
+  clerkId   String          @unique
+  name      String?
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  account   Account?
+  entries   JournalEntry[]
+  analysis  EntryAnalysis[]
+}
+
+model Account {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  // stripeCustomerId String @unique
+  @@unique([userId])
+}
+
+enum JOURNAL_ENTRY_STATUS {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+
+model JournalEntry {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  content  String               @db.Text
+  status   JOURNAL_ENTRY_STATUS @default(DRAFT)
+  analysis EntryAnalysis?
+
+  // @@unique([userId, id]): This specifies a compound unique constraint on the userId and id fields.
+  // This means that the combination of userId and id must be unique in the JournalEntry model.
+  // This allows a user to have many entries,
+  // and every entry will have a unique combination of userId and id.
+  @@unique([userId, id])
+}
+
+model EntryAnalysis {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  entryId String
+  entry   JournalEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // from AI
+  mood           String  @db.Text
+  subject        String  @db.Text
+  negative       Boolean
+  summary        String  @db.Text
+  color          String  @default("#0101fe") @db.Text
+  sentimentScore Float
+
+  @@unique([entryId])
+  @@index([userId])
+}
