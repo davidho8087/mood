@@ -1,7 +1,24 @@
 'use client'
+import { EntryAnalysis } from '@prisma/client'
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
 
-const CustomTooltip = ({ payload, label, active }) => {
+const STROKE_COLOR = '#8884d8'
+const STROKE_WIDTH = 2
+
+type Payload = {
+  payload: EntryAnalysis
+}
+
+type CustomToolTipProps = {
+  payload: Payload[]
+  active: boolean
+  label: Date
+}
+
+const CustomTooltip = ({ payload, label, active }: CustomToolTipProps) => {
+  console.log('label', label)
+  console.log('payload', payload)
+  console.log('active', active)
   const dateLabel = new Date(label).toLocaleString('en-us', {
     weekday: 'long',
     year: 'numeric',
@@ -28,22 +45,35 @@ const CustomTooltip = ({ payload, label, active }) => {
   return null
 }
 
-const HistoryChart = ({ data }) => {
+const HistoryChart = ({ data }: { data: EntryAnalysis[] }) => {
+  const payloadForCustomTooltip = data.map((entryAnalysis) => ({
+    payload: entryAnalysis,
+  }))
+  const label = new Date()
+
   return (
     <ResponsiveContainer width="100%" height="100%">
       <LineChart width={300} height={100} data={data}>
         <Line
           type="monotone"
           dataKey="sentimentScore"
-          stroke="#8884d8"
-          strokeWidth={2}
+          stroke={STROKE_COLOR}
+          strokeWidth={STROKE_WIDTH}
           activeDot={{ r: 8 }}
         />
+
         <XAxis dataKey="updatedAt" />
-        <Tooltip content={<CustomTooltip />} />
+        <Tooltip
+          content={
+            <CustomTooltip
+              payload={payloadForCustomTooltip}
+              label={label}
+              active={true}
+            />
+          }
+        />
       </LineChart>
     </ResponsiveContainer>
   )
 }
-
 export default HistoryChart

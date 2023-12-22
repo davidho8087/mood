@@ -1,10 +1,11 @@
 import HistoryChart from '@/components/HistoryChart'
 import { getUserFromClerkID } from '@/utils/auth'
 import { prisma } from '@/utils/db'
+import { EntryAnalysis } from '@prisma/client'
 
 const getData = async () => {
   const user = await getUserFromClerkID()
-  const analyses = await prisma.entryAnalysis.findMany({
+  const analyses: EntryAnalysis[] = await prisma.entryAnalysis.findMany({
     where: {
       userId: user.id,
     },
@@ -12,6 +13,7 @@ const getData = async () => {
       createdAt: 'asc',
     },
   })
+  
   const total = analyses.reduce((acc, curr) => {
     return acc + curr.sentimentScore
   }, 0)
