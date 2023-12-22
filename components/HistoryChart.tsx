@@ -16,9 +16,6 @@ type CustomToolTipProps = {
 }
 
 const CustomTooltip = ({ payload, label, active }: CustomToolTipProps) => {
-  console.log('label', label)
-  console.log('payload', payload)
-  console.log('active', active)
   const dateLabel = new Date(label).toLocaleString('en-us', {
     weekday: 'long',
     year: 'numeric',
