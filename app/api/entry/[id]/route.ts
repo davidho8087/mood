@@ -41,7 +41,6 @@ export const PATCH = async (request: Request, { params }: ParamsProp) => {
 
   const analysis = await analyzeEntry(entry)
 
-  console.log('analysis', analysis)
   const savedAnalysis = await prisma.entryAnalysis.upsert({
     where: {
       entryId: entry.id,
